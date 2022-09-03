@@ -29,7 +29,6 @@ router.get(p.get, async (_: Request, res: Response) => {
 
   try {
     const products:ProdSQL[] = await db.query(query, {type: QueryTypes.SELECT });
-    db.close();
     return res.status(OK).json(convertSQLToObject(products));
   } catch (error) {
     return res.status(INTERNAL_SERVER_ERROR);
@@ -71,11 +70,9 @@ router.post(p.getAtt, async (req: Request, res: Response) => {
       }
     })
     
-    db.close();
     return res.status(OK).json(objAtt);
     
   } catch (error) {
-      db.close();
       return res.status(INTERNAL_SERVER_ERROR);    
   }
 });
@@ -95,11 +92,9 @@ router.post(p.getTypes, async (req: Request, res: Response) => {
   try {
     const queryGetType = `Select * FROM type_product WHERE name="${type}";`
     const getType:any = await db.query(queryGetType, {type: QueryTypes.SELECT });
-    db.close();
     return res.status(OK).json(getType[0].idtype_product);
     
   } catch (error) {
-      db.close();
       return res.status(INTERNAL_SERVER_ERROR);    
   }
 });
@@ -170,7 +165,6 @@ router.post(p.add, async (req: Request, res: Response) => {
       // 5. COMMIT
       await t.commit();
       
-      db.close();
       // 6. COMMITED
       return res.status(CREATED).json({message: 'Product added successfully'}
       ); 
@@ -178,7 +172,6 @@ router.post(p.add, async (req: Request, res: Response) => {
     } catch (error) {
       // 7. MANAGE ROLLBACK IN CASE OF ERROR
       const rollback = await t.rollback();
-      db.close();
       return res.status(INTERNAL_SERVER_ERROR).json({
         data: error,
         rollback
@@ -221,14 +214,12 @@ router.delete(p.delete, async (req: Request, res: Response) => {
       // 4. Commit transaction
       const commit = await db.query("COMMIT");
         
-      db.close();
       return res.status(OK).json({
         data: commit,
         message: 'Product deleted'}
       );
     } catch (error){
       const rollback = await db.query("rollback");
-      db.close();
       return res.status(INTERNAL_SERVER_ERROR).json({
         data: error,
         message: error,
