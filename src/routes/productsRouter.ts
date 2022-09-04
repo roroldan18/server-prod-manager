@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import StatusCodes from 'http-status-codes';
 import { Request, Response, Router } from 'express';
 import { QueryTypes } from 'sequelize';
@@ -21,8 +22,10 @@ export const p = {
 /**
  * Get all products with its info.
  */
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 router.get(p.get, async (_: Request, res: Response) => {
-  const query = `SELECT p.SKU, p.name, p.price, t.name as "type", a.name as "attribute", a.measureUnit, pa.value FROM product as p
+  const query = `SELECT p.SKU, p.name, p.price, t.name as "type", 
+  a.name as "attribute", a.measureUnit, pa.value FROM product as p
   JOIN type_product as t ON p.type_product_idtype_product=t.idtype_product
   JOIN product_has_attribute as pa ON p.SKU=pa.product_SKU
   JOIN attribute as a ON pa.attribute_idattribute=a.idattribute`;
@@ -54,7 +57,7 @@ router.post(p.getAtt, async (req: Request, res: Response) => {
     const allAtt = await db.query(queryGetAllAtt, {type: QueryTypes.SELECT });
     
     
-    let objAtt:attributeJSON[] = [];
+    const objAtt:attributeJSON[] = [];
     
     Object.keys(attributes[0]).forEach(key => {
   
@@ -107,6 +110,7 @@ export interface attributeJSON {
 /**
  * Add one product.
  */
+
 router.post(p.add, async (req: Request, res: Response) => {
 
   const { SKU, name, price, type, attributes } = req.body;  
@@ -119,7 +123,7 @@ router.post(p.add, async (req: Request, res: Response) => {
   }
   
   // 1.Validate if product exists --> OK
-  const queryProdSKU = `SELECT * FROM product WHERE SKU=${parseInt(SKU)}`;
+  const queryProdSKU = `SELECT * FROM product WHERE SKU=${SKU}`;
   const prodWithSKU:ProdSQL[]|[] = await db.query(queryProdSKU, {type: QueryTypes.SELECT });
   if(prodWithSKU.length>0){
     return res.status(BAD_REQUEST).json({
@@ -139,7 +143,9 @@ router.post(p.add, async (req: Request, res: Response) => {
   })
 
 
-  const queryAtt = `SELECT * FROM type_product_has_attribute WHERE type_product_idtype_product=${type};`
+  const queryAtt = `SELECT * FROM type_product_has_attribute 
+  WHERE type_product_idtype_product=${type};`
+  
   const totalAtt = await db.query(queryAtt, {type: QueryTypes.SELECT });
 
   // 3. Check if all attributes were sent
@@ -151,15 +157,15 @@ router.post(p.add, async (req: Request, res: Response) => {
 
 
   // Once pass every validation, create the transaction
-    let t = await db.transaction();
+    const t = await db.transaction();
 
     try {
       // 3. INSERT PRODUCT
-      await db.query("INSERT INTO product (SKU, name, price, type_product_idtype_product) VALUES (?,?,?,?);", {replacements: [parseInt(SKU), name, price, type]});
+      await db.query("INSERT INTO product (SKU, name, price, type_product_idtype_product) VALUES (?,?,?,?);", {replacements: [SKU, name, price, type]});
 
       // 4. INSERT PRODUCT_ATTRIBUTE
       await attributes.forEach(async (att:attributeJSON) => {
-        await db.query("INSERT INTO product_has_attribute(product_SKU, attribute_idattribute, value) VALUES (?,?,?);", {replacements: [parseInt(SKU), att.idAttribute, att.value]});
+        await db.query("INSERT INTO product_has_attribute(product_SKU, attribute_idattribute, value) VALUES (?,?,?);", {replacements: [SKU, att.idAttribute, att.value]});
       });
 
       // 5. COMMIT
@@ -196,7 +202,7 @@ router.delete(p.delete, async (req: Request, res: Response) => {
 
     try{
       // 2. Confirm if product exists
-      const queryProdSKU = `SELECT * FROM product WHERE SKU=${parseInt(SKU)}`;
+      const queryProdSKU = `SELECT * FROM product WHERE SKU=${SKU}`;
       const prodWithSKU:ProdSQL[]|[] = await db.query(queryProdSKU, {type: QueryTypes.SELECT });
       if(prodWithSKU.length===0){
         return res.status(BAD_REQUEST).json({
@@ -208,9 +214,9 @@ router.delete(p.delete, async (req: Request, res: Response) => {
       // 1. Create transaction
       await db.query("START TRANSACTION");
       // 2. Delete all attributes for the SKU
-      await db.query(`DELETE FROM product_has_attribute WHERE product_SKU=${parseInt(SKU)}`)
+      await db.query(`DELETE FROM product_has_attribute WHERE product_SKU=${SKU}`)
       // 3. Delete product
-      await db.query(`DELETE FROM product WHERE SKU=${parseInt(SKU)}`)
+      await db.query(`DELETE FROM product WHERE SKU=${SKU}`)
       // 4. Commit transaction
       const commit = await db.query("COMMIT");
         

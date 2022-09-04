@@ -1,6 +1,6 @@
 
 export interface ProdSQL {
-  SKU: number,
+  SKU: string,
   name: string,
   price: number,
   type: string,
@@ -10,7 +10,7 @@ export interface ProdSQL {
 }
 
 export interface ProdStruct {
-  SKU: number,
+  SKU: string,
   name: string,
   price: number,
   type: string,

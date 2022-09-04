@@ -2,7 +2,8 @@ import { ProdSQL, ProdStruct } from "src/interfaces/interfaces";
 
   
 const checkIfExist = (arrProdToAnalyze:ProdStruct[], prodSQL:ProdSQL):boolean => {
-  for(let prodToAnalize of arrProdToAnalyze){
+
+  for(const prodToAnalize of arrProdToAnalyze){
     if(prodToAnalize.SKU === prodSQL.SKU){
       return true;
     }
@@ -11,11 +12,12 @@ const checkIfExist = (arrProdToAnalyze:ProdStruct[], prodSQL:ProdSQL):boolean =>
 }
 
 export const convertSQLToObject = (prodSQL:ProdSQL[]):ProdStruct[] => {
-  let productStructure:ProdStruct[] = [];
+  const productStructure:ProdStruct[] = [];
   
   prodSQL.forEach(prod => {
     if(checkIfExist(productStructure, prod)){
-      const index = productStructure.indexOf(productStructure.find(p=> p.SKU === prod.SKU) as ProdStruct)
+      const index = productStructure.indexOf(
+        productStructure.find(p=> p.SKU === prod.SKU) as ProdStruct)
       productStructure[index].attributes.push({
         name: prod.attribute,
         measureUnit: prod.measureUnit,
