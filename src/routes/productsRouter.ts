@@ -123,7 +123,7 @@ router.post(p.add, async (req: Request, res: Response) => {
   }
   
   // 1.Validate if product exists --> OK
-  const queryProdSKU = `SELECT * FROM product WHERE SKU=${SKU}`;
+  const queryProdSKU = `SELECT * FROM product WHERE SKU="${SKU}"`;
   const prodWithSKU:ProdSQL[]|[] = await db.query(queryProdSKU, {type: QueryTypes.SELECT });
   if(prodWithSKU.length>0){
     return res.status(BAD_REQUEST).json({
