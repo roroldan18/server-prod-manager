@@ -133,7 +133,7 @@ router.post(p.add, async (req: Request, res: Response) => {
 
   // 2.Check if attributes are in type --> OK
   await attributes.forEach( async(att:attributeJSON) => {
-    const queryTypesAtt = `SELECT * FROM type_product_has_attribute WHERE type_product_idtype_product=${type} AND attribute_idattribute=${att.idAttribute};`
+    const queryTypesAtt = `SELECT * FROM type_product_has_attribute WHERE type_product_idtype_product="${type}" AND attribute_idattribute="${att.idAttribute}";`
     const typesAtt = await db.query(queryTypesAtt, {type: QueryTypes.SELECT });
     if(typesAtt.length === 0){
       return res.status(BAD_REQUEST).json({
@@ -144,7 +144,7 @@ router.post(p.add, async (req: Request, res: Response) => {
 
 
   const queryAtt = `SELECT * FROM type_product_has_attribute 
-  WHERE type_product_idtype_product=${type};`
+  WHERE type_product_idtype_product="${type}";`
   
   const totalAtt = await db.query(queryAtt, {type: QueryTypes.SELECT });
 
@@ -202,7 +202,7 @@ router.delete(p.delete, async (req: Request, res: Response) => {
 
     try{
       // 2. Confirm if product exists
-      const queryProdSKU = `SELECT * FROM product WHERE SKU=${SKU}`;
+      const queryProdSKU = `SELECT * FROM product WHERE SKU="${SKU}"`;
       const prodWithSKU:ProdSQL[]|[] = await db.query(queryProdSKU, {type: QueryTypes.SELECT });
       if(prodWithSKU.length===0){
         return res.status(BAD_REQUEST).json({
@@ -214,9 +214,9 @@ router.delete(p.delete, async (req: Request, res: Response) => {
       // 1. Create transaction
       await db.query("START TRANSACTION");
       // 2. Delete all attributes for the SKU
-      await db.query(`DELETE FROM product_has_attribute WHERE product_SKU=${SKU}`)
+      await db.query(`DELETE FROM product_has_attribute WHERE product_SKU="${SKU}"`)
       // 3. Delete product
-      await db.query(`DELETE FROM product WHERE SKU=${SKU}`)
+      await db.query(`DELETE FROM product WHERE SKU="${SKU}"`)
       // 4. Commit transaction
       const commit = await db.query("COMMIT");
         
